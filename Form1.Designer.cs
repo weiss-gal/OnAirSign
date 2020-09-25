@@ -33,6 +33,7 @@
             this.playbackStatusLabel = new System.Windows.Forms.Label();
             this.captureTimer = new System.Windows.Forms.Timer(this.components);
             this.captureStatusLabel = new System.Windows.Forms.Label();
+            this.connectionStatusLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // counterLabel
@@ -68,11 +69,22 @@
             this.captureStatusLabel.TabIndex = 2;
             this.captureStatusLabel.Text = "Playback Status:";
             // 
+            // label1
+            // 
+            this.connectionStatusLabel.AutoSize = true;
+            this.connectionStatusLabel.Location = new System.Drawing.Point(129, 31);
+            this.connectionStatusLabel.Name = "label1";
+            this.connectionStatusLabel.Size = new System.Drawing.Size(97, 13);
+            this.connectionStatusLabel.TabIndex = 3;
+            this.connectionStatusLabel.Text = "Connection Status:";
+            this.connectionStatusLabel.Click += new System.EventHandler(this.label1_Click_1);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.connectionStatusLabel);
             this.Controls.Add(this.captureStatusLabel);
             this.Controls.Add(this.playbackStatusLabel);
             this.Controls.Add(this.counterLabel);
@@ -89,6 +101,7 @@
         private System.Windows.Forms.Label playbackStatusLabel;
         private System.Windows.Forms.Timer captureTimer;
         private System.Windows.Forms.Label captureStatusLabel;
+        private System.Windows.Forms.Label connectionStatusLabel;
     }
 }
 

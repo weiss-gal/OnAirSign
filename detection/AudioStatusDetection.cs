@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace OnAirSign.detection
 {
     //TODO: optimize by making a non-static class and reduce number of enumarations
-    public static class CallStatusDetection
+    public static class AudioStatusDetection
     {
        
         private static bool IsDeviceStreaming(EDataFlow type)

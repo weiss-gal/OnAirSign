@@ -1,0 +1,26 @@
+host commands: 
+==============
+HELLO [cmdid=<cmdid>]
+---------------------
+A probe message
+cmdid - command id, numerical string that can be used to identify the response
+
+response:
+RE HELLO cmdid=<cmdid|0> [ver=<ver>]
+cmdid - command id, as appears in the command. or 0 for command without id
+ver - arduino software version 
+
+SET_DISPLAY [cmdid=<cmdid>] state=<state>
+-----------
+A command to set the display status
+cmdid - command id, numerical string that can be used to identify the response
+state - a set of 3 digits, 0 for off and 1 for on. The order is 
+- audio playing
+- audio capturing
+- video capturing
+
+response: 
+RE SET_DISPLAY cmdid=<cmdid|0> status=<ok|nok> [reason=<reason code>]
+cmdid - command id, as appears in the command. or 0 for command without id
+status - ok for command received succesfuly, nok for problem 
+reason code - a numeric string, representing the problem 
