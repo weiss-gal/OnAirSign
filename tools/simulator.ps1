@@ -1,4 +1,7 @@
-﻿ [System.IO.Ports.SerialPort]::getportnames()
+﻿ ### NOTE: You should only run this script from a powershell console
+ ###       IE - don't try to run in from ISE or from VSCode, there will be trouble
+ 
+ [System.IO.Ports.SerialPort]::getportnames()
  $portName = "COM10"
 
  $port= new-Object System.IO.Ports.SerialPort $portName,9600,None,8,one
