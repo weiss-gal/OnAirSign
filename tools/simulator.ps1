@@ -9,12 +9,83 @@
  $port.close()
  $port.open()
 
- #Error Reason codes
- New-Variable -Name 'ERR_CODE_OK' -Value 0 -Option Constant
- New-Variable -Name 'ERR_CODE_UNKNOWN_ARG' -Value 1 -Option Constant
+#Error Reason codes
+New-Variable -Name 'ERR_CODE_OK' -Value 0 -Option Constant
+New-Variable -Name 'ERR_CODE_UNKNOWN_ARG' -Value 1 -Option Constant
+New-Variable -Name 'ERR_CODE_MISSING_MANDATORY_OPTION' -Value 2 -Option Constant
+New-Variable -Name 'ERR_CODE_INVALID_OPTION' -Value 3 -Option Constant
+
+# parses state, if sucessfull returns a descriptive string such as:
+#   "Audio playing=on, Audio capturing=off, Video capturing=off"
+# if failes, returns null
+function parseState{
+    param(
+        [String]$newState
+    )
+
+    if (!($newState -match '^([01])([01])([01])$')) {
+        return $null
+    }
+
+    $writeThis = "after parsing state, Matches are " + $Matches.0 + " " + $Matches.1 + " " + $Matches.2 + " " + $Matches.3
+    Write-Host $writeThis
 
 
- function handleCommandHello {
+    $audioPlayStr = "Audio playing=$(if ($Matches.1 -eq '0') {'off'} else {'on'})"
+    $audioCaptureStr = ", Audio Capturing=$(if ($Matches.2 -eq '0') {'off'} else {'on'})"
+    $videoCaptureStr = ", Video Capturing=$(if ($Matches.3 -eq '0') {'off'} else {'on'})"
+
+    return $audioPlayStr + $audioCaptureStr + $videoCaptureStr
+
+}
+
+function handleCommandSetDisplay {
+    param (
+        [String]$commandArgs
+    )
+    Write-Host "Handling command 'SET_DISPLAY' with arguments: '$commandArgs'"
+
+    $errReason = $ERR_CODE_OK
+    $cmdId = "0"
+
+    $options = $commandArgs.Split(" ")
+    $optionsSet = @{}
+    foreach($option in $options) {
+        Write-Host "parsing option '$option'"
+        if ($option -match '(\S+)=(\S+)') {
+            $writeThis = "after parsing option, Matches are " + $Matches.0 + " " + $Matches.1 + " " + $Matches.2 + " " + $Matches.3
+            Write-Host $writeThis
+            $optionsSet.Add($Matches.1, $Matches.2)
+        } else {
+            # option without parameter (no '=' afterwards)
+            $optionsSet.Add($option, "")
+        }
+    }
+
+    if ($optionsSet.ContainsKey('cmdid')) {
+        $cmdId = $optionsSet['cmdid']
+    }
+
+    if ($optionsSet.ContainsKey('state')) {
+        $newStateStr = parseState $optionsSet['state']
+        if ($null -eq $newStateStr){
+            Write-Host 'Failed to parse state'
+            $errReason = $ERR_CODE_INVALID_OPTION
+        } else {
+            Write-Host "Setting State to $newStateStr"
+        }
+        
+    } else {
+        $errReason = $ERR_CODE_MISSING_MANDATORY_OPTION
+    }
+
+    $retStatus = if ($errReason -eq $ERR_CODE_OK) {" status=ok"} else {" status=nok"}
+    $retReason = if ($errReason -eq $ERR_CODE_OK) {""} else {" reason=$errReason"}
+    
+    return "RE SET_DISPLAY cmdId=$cmdId" + $retStatus + $retReason
+}
+
+function handleCommandHello {
     param (
         [String]$commandArgs
     )
@@ -49,6 +120,7 @@
     $parts = $commandLine.Split(" ")
     $response = switch($parts[0]) {
         "HELLO" {handleCommandHello (($parts[1..100]) -join " ")}
+        "SET_DISPLAY" {handleCommandSetDisplay (($parts[1..100]) -join " ")}
         default {Write-Host "Unknown command: '$commandLine'"}
     }
 

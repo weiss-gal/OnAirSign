@@ -2,3 +2,4 @@ TODO:
 - support any (not just default) audio devices
 - support video capture detection
 - switch to threads.timer
+- support port detection
