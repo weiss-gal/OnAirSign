@@ -5,7 +5,7 @@
  $portName = "COM10"
 
  $port= new-Object System.IO.Ports.SerialPort $portName,9600,None,8,one
- $port.NewLine = "\r"
+ $port.NewLine = "`r"
  $port.close()
  $port.open()
 
@@ -29,7 +29,6 @@ function parseState{
 
     $writeThis = "after parsing state, Matches are " + $Matches.0 + " " + $Matches.1 + " " + $Matches.2 + " " + $Matches.3
     Write-Host $writeThis
-
 
     $audioPlayStr = "Audio playing=$(if ($Matches.1 -eq '0') {'off'} else {'on'})"
     $audioCaptureStr = ", Audio Capturing=$(if ($Matches.2 -eq '0') {'off'} else {'on'})"

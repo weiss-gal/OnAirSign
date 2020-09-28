@@ -1,4 +1,5 @@
-﻿using OnAirSign.arduino;
+﻿using Newtonsoft.Json;
+using OnAirSign.arduino;
 using OnAirSign.state;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,12 @@ namespace OnAirSign.display
         ArduinoManager arduino;
         public LedDisplay()
         {
-            arduino = new ArduinoManager("COM10");
+            arduino = new ArduinoManager("COM11");
         }
 
         public int UpdateDisplay(OnAirStatus status)
         {
-            Console.WriteLine($"Updating Led display with status: {status.ToString()}");
+            Console.WriteLine($"Updating Led display with status: {JsonConvert.SerializeObject(status)}");
             return 0;
         }
 

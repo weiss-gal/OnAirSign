@@ -15,7 +15,7 @@ namespace OnAirSign
 
     static class Program
     {
-        static Form1 form;
+        static OnAirForm form;
         static LedDisplay display;
         /// <summary>
         /// The main entry point for the application.
@@ -25,7 +25,7 @@ namespace OnAirSign
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            form = new Form1();
+            form = new OnAirForm();
             form.OnTick(timer);
             display = new LedDisplay();
             Application.Run(form);

@@ -5,15 +5,7 @@ using System.Threading;
 
 namespace OnAirSign.arduino
 {
-    //public class Message
-    //{
-    //    public byte[] _data {get;}
-    //    public Message(byte[] data)
-    //    {
-    //        _data = data;
-    //    }
-
-    //}
+    
     class SerialMailbox
     {
 
@@ -22,6 +14,7 @@ namespace OnAirSign.arduino
         SerialPort _serialPort;
         Thread thread;
         bool exit = false;
+        Action dataReceivedCB;
 
         private void readThread()
         {
@@ -29,15 +22,35 @@ namespace OnAirSign.arduino
             {
                 try
                 {
+                    //TODO: just a debug code
                     var line = _serialPort.ReadLine();
+                    Console.WriteLine($"reading line from serial port: '{line}'");
                     inbox.Enqueue(line);
-                } catch (TimeoutException) {}
+                    dataReceivedCB();
+                } catch (System.TimeoutException) {
+                    Console.WriteLine($"reading exception");
+                }
             }
         }
 
-        public SerialMailbox(SerialPort serialport)
+        private SerialPort initSerialPort(SerialPort serialPort)
         {
-            _serialPort = serialport;
+            serialPort.ReadTimeout = 2000;
+            serialPort.WriteTimeout = 500;
+            serialPort.DataBits = 8;
+            serialPort.Parity = Parity.None;
+            serialPort.StopBits = StopBits.One;
+            serialPort.Handshake = Handshake.XOnXOff;
+            serialPort.NewLine = "\r";
+
+            return serialPort;
+        }
+
+        public SerialMailbox(SerialPort serialPort, Action dataReceivedCB)
+        {
+            _serialPort = initSerialPort(serialPort);
+            this.dataReceivedCB = dataReceivedCB;
+            
             thread = new Thread(new ThreadStart(readThread));
             thread.Start();
         }
@@ -50,8 +63,14 @@ namespace OnAirSign.arduino
 
         public void SendMessage(string msg)
         {
-            // TODO: add size check limit
-            _serialPort.WriteLine(msg);
+            try
+            {
+                // TODO: add size check limit
+                _serialPort.WriteLine(msg);
+            } catch (Exception e)
+            {
+                Console.WriteLine($"Failed to write to console with exception:{e}");
+            }
         }
 
         public string ReadMessage()

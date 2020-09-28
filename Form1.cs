@@ -13,13 +13,13 @@ using System.Windows.Forms;
 namespace OnAirSign
 {
     public delegate void Callback();
-    public partial class Form1 : Form
+    public partial class OnAirForm : Form
     {
         int counter = 0;
         Callback onTickCB = null;
         OnAirStatus onAirStatus = new OnAirStatus();
 
-        public Form1()
+        public OnAirForm()
         {
             InitializeComponent();
             captureTimer.Enabled = true;

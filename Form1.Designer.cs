@@ -1,6 +1,6 @@
 ﻿namespace OnAirSign
 {
-    partial class Form1
+    partial class OnAirForm
     {
         /// <summary>
         /// Required designer variable.
@@ -69,17 +69,17 @@
             this.captureStatusLabel.TabIndex = 2;
             this.captureStatusLabel.Text = "Playback Status:";
             // 
-            // label1
+            // connectionStatusLabel
             // 
             this.connectionStatusLabel.AutoSize = true;
             this.connectionStatusLabel.Location = new System.Drawing.Point(129, 31);
-            this.connectionStatusLabel.Name = "label1";
+            this.connectionStatusLabel.Name = "connectionStatusLabel";
             this.connectionStatusLabel.Size = new System.Drawing.Size(97, 13);
             this.connectionStatusLabel.TabIndex = 3;
             this.connectionStatusLabel.Text = "Connection Status:";
             this.connectionStatusLabel.Click += new System.EventHandler(this.label1_Click_1);
             // 
-            // Form1
+            // OnAirForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -88,8 +88,8 @@
             this.Controls.Add(this.captureStatusLabel);
             this.Controls.Add(this.playbackStatusLabel);
             this.Controls.Add(this.counterLabel);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "OnAirForm";
+            this.Text = "On Air Sign Controller";
             this.ResumeLayout(false);
             this.PerformLayout();
 

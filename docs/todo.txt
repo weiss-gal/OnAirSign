@@ -3,3 +3,5 @@ TODO:
 - support video capture detection
 - switch to threads.timer
 - support port detection
+- add logger
+- simulator should use ReadLine()
