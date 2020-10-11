@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using OnAirSign.arduino;
+using OnAirSign.infra.logging;
 using OnAirSign.state;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,9 @@ namespace OnAirSign.display
     public class LedDisplay
     {
         ArduinoManager arduino;
-        public LedDisplay()
+        public LedDisplay(ILogger logger)
         {
-            arduino = new ArduinoManager("COM6");
+            arduino = new ArduinoManager("COM5", logger);
         }
 
         public int UpdateDisplay(OnAirStatus status)

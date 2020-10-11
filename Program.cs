@@ -1,5 +1,6 @@
 ﻿using OnAirSign.detection;
 using OnAirSign.display;
+using OnAirSign.infra.logging;
 using OnAirSign.state;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,8 @@ namespace OnAirSign
             Application.SetCompatibleTextRenderingDefault(false);
             form = new OnAirForm();
             form.OnTick(timer);
-            display = new LedDisplay();
+            var logger = new ConsoleLogger(LogLevel.Debug);
+            display = new LedDisplay(logger);
             Application.Run(form);
             
         }

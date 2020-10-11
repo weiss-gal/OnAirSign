@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OnAirSign.infra.logging;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace OnAirSign.arduino
         ConnectionMonitor connectionMonitor;
         Action dataReceivedAction;
 
-        public ArduinoManager(string portName, int baudRate = DefaultBaudeRate)
+        public ArduinoManager(string portName, ILogger logger, int baudRate = DefaultBaudeRate)
         {
             port = new SerialPort(portName, baudRate);
             port.Open();
@@ -106,6 +107,12 @@ namespace OnAirSign.arduino
                     break;
             }
         }
+
+        private void handleLogMessage(string msg)
+        {
+
+        }
+
         private void handleMessage(string msg)
         {
             var msgTuple = breakOnFirstSpace(msg);
@@ -115,6 +122,8 @@ namespace OnAirSign.arduino
                 case "RE":
                     handleResponse(msgTuple.Item2);
                     break;
+                case "LOG":
+
                 default:
                     Console.WriteLine($"Unknown message type '{msgTuple.Item1}'");
                     break;
