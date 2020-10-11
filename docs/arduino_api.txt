@@ -23,4 +23,17 @@ response:
 RE SET_DISPLAY cmdid=<cmdid|0> status=<ok|nok> [reason=<reason code>]
 cmdid - command id, as appears in the command. or 0 for command without id
 status - ok for command received succesfuly, nok for problem 
-reason code - a numeric string, representing the problem 
+reason code - a numeric string, representing the problem (see 'reason codes' below)
+
+client commands:
+================
+LOG <log level>: <log message>
+Sending a log message 
+log level - one of: DEBUG, INFO, WARNING, ERROR, FATAL
+log message - A string (may contain spaces) with logging message
+
+reason codes
+============
+1 - unknown option - arduino may choose to discard messages with unknown options (using this code) or ignore unknown options
+2 - missing mandatory option
+3 

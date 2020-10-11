@@ -11,7 +11,7 @@
 
 #Error Reason codes
 New-Variable -Name 'ERR_CODE_OK' -Value 0 -Option Constant
-New-Variable -Name 'ERR_CODE_UNKNOWN_ARG' -Value 1 -Option Constant
+New-Variable -Name 'ERR_CODE_UNKNOWN_OPTION' -Value 1 -Option Constant
 New-Variable -Name 'ERR_CODE_MISSING_MANDATORY_OPTION' -Value 2 -Option Constant
 New-Variable -Name 'ERR_CODE_INVALID_OPTION' -Value 3 -Option Constant
 
@@ -101,7 +101,7 @@ function handleCommandHello {
             $cmdId = $arg1Parts[1]
         } else {
             # unknown arg
-            $errReason = $ERR_CODE_UNKNOWN_ARG
+            $errReason = $ERR_CODE_UNKNOWN_OPTION
         }
     }
     
