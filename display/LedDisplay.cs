@@ -14,7 +14,7 @@ namespace OnAirSign.display
         ArduinoManager arduino;
         public LedDisplay()
         {
-            arduino = new ArduinoManager("COM11");
+            arduino = new ArduinoManager("COM6");
         }
 
         public int UpdateDisplay(OnAirStatus status)

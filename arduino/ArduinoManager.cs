@@ -12,7 +12,7 @@ namespace OnAirSign.arduino
     public class ArduinoManager
     {
       
-        const int DefaultBaudeRate = 9600;
+        const int DefaultBaudeRate = 115200;
         SerialPort port;
         SerialMailbox mailbox;
         ConnectionMonitor connectionMonitor;

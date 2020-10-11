@@ -2,10 +2,10 @@
  ###       IE - don't try to run in from ISE or from VSCode, there will be trouble
  
  [System.IO.Ports.SerialPort]::getportnames()
- $portName = "COM10"
+ $portName = "COM7"
 
- $port= new-Object System.IO.Ports.SerialPort $portName,9600,None,8,one
- $port.NewLine = "`r"
+ $port= new-Object System.IO.Ports.SerialPort $portName,115200,None,8,one
+ $port.NewLine = "`r`n"
  $port.close()
  $port.open()
 
@@ -129,20 +129,12 @@ function handleCommandHello {
  $port.WriteLine("Arduino led display simulator started at port $portName")
  
  $exit = $false
- $inputBuffer = ""
 
  While (!$exit) {
-    if ($port.BytesToRead -gt 0) {
-        $byte = $port.ReadByte()
-        if ($byte -eq 13) { #end of line, process command
-            handleCommand $inputBuffer
-            $inputBuffer = ""
-        } else {
-            $inputBuffer = $inputBuffer + [char]$byte
-        }
+     if ($port.BytesToRead -gt 0) {
+    $line = $port.ReadLine()
+    handleCommand $line
     }
-
-
     if ([Console]::KeyAvailable) {
         $exit = $true
     }

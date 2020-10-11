@@ -1,5 +1,5 @@
 TODO:
-- support any (not just default) audio devices
+- support any (not just default) audio devices, including support for no default device
 - support video capture detection
 - switch to threads.timer
 - support port detection

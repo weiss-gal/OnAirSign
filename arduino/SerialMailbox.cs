@@ -41,7 +41,7 @@ namespace OnAirSign.arduino
             serialPort.Parity = Parity.None;
             serialPort.StopBits = StopBits.One;
             serialPort.Handshake = Handshake.XOnXOff;
-            serialPort.NewLine = "\r";
+            serialPort.NewLine = "\r\n";
 
             return serialPort;
         }
