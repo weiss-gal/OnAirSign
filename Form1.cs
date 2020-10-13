@@ -69,5 +69,10 @@ namespace OnAirSign
         {
 
         }
+
+        private void label1_Click_2(object sender, EventArgs e)
+        {
+
+        }
     }
 }

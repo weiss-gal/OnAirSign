@@ -1,15 +1,27 @@
 ﻿using OnAirSign.infra.logging;
+using OnAirSign.state;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OnAirSign.arduino
 {
+    public class TextProtocol
+    {
+        // Commands
+        public const string COMMAND_HELLO = "HELLO";
+        public const string COMMAND_SET_DISPLAY = "SET_DISPLAY";
+        public const string COMMAND_RESPONSE = "RE";
+        public const string COMMAND_LOG = "LOG";
+
+        // Command options
+        public const string OPTION_CMD_ID = "cmdid";
+        public const string OPTION_STATE = "state";
+        public const string OPTION_STATUS = "status";
+        public const string OPTION_REASON = "reason";
+    }
+
     public class ArduinoManager
     {
       
@@ -18,10 +30,12 @@ namespace OnAirSign.arduino
         SerialMailbox mailbox;
         ConnectionMonitor connectionMonitor;
         Action dataReceivedAction;
+        ILogger logger;
 
         public ArduinoManager(string portName, ILogger logger, int baudRate = DefaultBaudeRate)
         {
             port = new SerialPort(portName, baudRate);
+            this.logger = logger;
             port.Open();
             dataReceivedAction = () => dataRecieved();
             // Using Invoke() to force handling from main thread
@@ -34,10 +48,15 @@ namespace OnAirSign.arduino
             port.Close();
         }
 
-        private int helloCounter = 0;
+        private int commandCounter = 0;
+        private string getCommandId()
+        {
+            return $"{TextProtocol.OPTION_CMD_ID}={commandCounter++}";
+        }
+
         private void sendHello()
         {
-            mailbox.SendMessage($"HELLO cmdid={helloCounter++}");
+            mailbox.SendMessage($"{TextProtocol.COMMAND_HELLO} {getCommandId()}");
         }
 
         private void updateConnectionStatus(bool isConnected)
@@ -61,7 +80,6 @@ namespace OnAirSign.arduino
             }
 
             return new Tuple<string, string>(firstPart, secondPart);
-
         }
 
         private Dictionary<string, string>parseMessageOptions(string msgOptionsStr)
@@ -80,16 +98,31 @@ namespace OnAirSign.arduino
         private void handleHelloResponse(string responseOptions)
         {
             var options = parseMessageOptions(responseOptions);
-            Console.WriteLine($"Recived HELLO response with the follwing options: '{options}'");
 
             connectionMonitor.ResponseRecived();
         }
 
         private void handleSetDisplayResponse(string responseOptions)
         {
+            var options = parseMessageOptions(responseOptions);
+
+            if (!options.ContainsKey(TextProtocol.OPTION_STATUS))
+            {
+                logger.Log(LogLevel.Warning, 
+                    $"Got Invalid response for {TextProtocol.COMMAND_SET_DISPLAY} command, missing '{TextProtocol.OPTION_STATUS}' option");
+                return;
+            }
+
+            if (options[TextProtocol.OPTION_STATUS] != "ok")
+            {
+                var errorReason = options.ContainsKey(TextProtocol.OPTION_REASON) ? $"Error reason ='{options[TextProtocol.OPTION_REASON]}'" :
+                    $"No Error reason";
+
+                logger.Log(LogLevel.Warning, $"Failed to set display status. {errorReason}");
+                return;
+            }
 
         }
-
         private void handleResponse(string responseMsg)
         {
             // The first part of the response is message type of this response, the rest is options
@@ -110,7 +143,30 @@ namespace OnAirSign.arduino
 
         private void handleLogMessage(string msg)
         {
+            var logLevelMap = new Dictionary<string, LogLevel>()
+            {
+                {"DEBUG", LogLevel.Debug },
+                {"INFO", LogLevel.Info},
+                {"WARNING", LogLevel.Warning},
+                {"ERROR", LogLevel.Error},
+                {"FATAL", LogLevel.Fatal}
+            };
 
+            var msgTuple = breakOnFirstSpace(msg);
+            LogLevel level;
+            if (!logLevelMap.TryGetValue(msgTuple.Item1, out level))
+            {
+                logger.Log(LogLevel.Warning, $"Got log message with unknown level '{level}'");
+                return;
+            }
+
+            if (String.IsNullOrEmpty(msgTuple.Item2))
+            {
+                logger.Log(LogLevel.Warning, $"Got log message with empty content");
+                return;
+            }
+
+            logger.Log(level, $"Arduino: {msgTuple.Item2}");
         }
 
         private void handleMessage(string msg)
@@ -119,11 +175,12 @@ namespace OnAirSign.arduino
             
             switch (msgTuple.Item1)
             {
-                case "RE":
+                case TextProtocol.COMMAND_RESPONSE:
                     handleResponse(msgTuple.Item2);
                     break;
-                case "LOG":
-
+                case TextProtocol.COMMAND_LOG:
+                    handleLogMessage(msgTuple.Item2);
+                    break;
                 default:
                     Console.WriteLine($"Unknown message type '{msgTuple.Item1}'");
                     break;
@@ -139,6 +196,16 @@ namespace OnAirSign.arduino
 
                 msg = mailbox.ReadMessage();
             }
+        }
+
+        public void SendUpdateDisplayMessage(OnAirStatus status)
+        {
+            var newDisplayState = "state=" +
+                (status.IsAudioPlaying ? "1" : "0") +
+                (status.IsAudioCapturing ? "1" : "0") +
+                (status.IsCameraCapturing ? "1" : "0");
+
+            mailbox.SendMessage($"{TextProtocol.COMMAND_SET_DISPLAY} {getCommandId()} {newDisplayState}");
         }
 
         public string ConnectionStatus { get; private set; } = null;

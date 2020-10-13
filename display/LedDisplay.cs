@@ -13,14 +13,17 @@ namespace OnAirSign.display
     public class LedDisplay
     {
         ArduinoManager arduino;
+        ILogger logger;
         public LedDisplay(ILogger logger)
         {
             arduino = new ArduinoManager("COM5", logger);
+            this.logger = logger;
         }
 
         public int UpdateDisplay(OnAirStatus status)
         {
-            Console.WriteLine($"Updating Led display with status: {JsonConvert.SerializeObject(status)}");
+            logger.Log(LogLevel.Debug, $"Updating Led display with status: {JsonConvert.SerializeObject(status)}");
+            arduino.SendUpdateDisplayMessage(status);
             return 0;
         }
 
@@ -29,5 +32,4 @@ namespace OnAirSign.display
             return arduino.ConnectionStatus;
         }
     }
-
 }
