@@ -3,6 +3,9 @@
 
 <mark>This project is currnetly under construction. </mark>
 
+update [14-Oct-2020]: We are nearly there ! I have the complete end-to-end concept working, animations updated correctly on the arduino. 
+Hang on there, home workers, your "On Air" sign is nearly there.
+
 Add to your watch list to know when its finally usable (ETA - a matter of days)
 
 The target is to create an arduino based "on air" sign, connected to a PC via USB cable, 
