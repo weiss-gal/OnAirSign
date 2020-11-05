@@ -1,7 +1,11 @@
 TODO:
-- support any (not just default) audio devices, including support for no default device
-- support video capture detection
-- switch to threads.timer
+
+P0
+- fix UI
 - support port detection
-- add logger
-- simulator should use ReadLine()
+- remove camera part
+
+P1
+- support video capture detection
+- support any (not just default) audio devices, including support for no default device
+- switch to threads.timer
