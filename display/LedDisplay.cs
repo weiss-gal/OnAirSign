@@ -16,8 +16,9 @@ namespace OnAirSign.display
         ILogger logger;
         public LedDisplay(ILogger logger)
         {
-            arduino = new ArduinoManager("COM5", logger);
+            arduino = new ArduinoManager(logger);
             this.logger = logger;
+            arduino.AutoConnect();
         }
 
         public int UpdateDisplay(OnAirStatus status)

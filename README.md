@@ -1,7 +1,7 @@
 # OnAirSign
 "On-Air" led sign - controller application
 
-<mark>This project is currnetly under construction. </mark>
+<mark>This project is currently under construction. </mark>
 
 update [14-Oct-2020]: We are nearly there ! I have the complete end-to-end concept working, animations updated correctly on the arduino. 
 Hang on there, home workers, your "On Air" sign is nearly there.

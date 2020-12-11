@@ -17,26 +17,29 @@ namespace OnAirSign
     {
         int counter = 0;
         Callback onTickCB = null;
-        OnAirStatus onAirStatus = new OnAirStatus();
+        OnAirStatus onAirStatus; 
 
         public OnAirForm()
         {
             InitializeComponent();
             captureTimer.Enabled = true;
+            UpdateOnAirStatus(new OnAirStatus());
         }
 
         public void UpdateOnAirStatus(OnAirStatus status)
         {
             onAirStatus = status;
+            playbackStatusOutputLabel.Text = status.IsAudioCapturing ? "Streaming" : "Idle";
+            microphoneStatusOutputLabel.Text = status.IsAudioCapturing ? "Streaming" : "Idle";
         }
 
         public void UpdateCommunicationStatusError(string error)
         {
             // TODO: add to display
             if (error == null)
-                connectionStatusLabel.Text = "Connection Status: OK";
+                connectionStatusOutputLabel.Text = "Connected";
             else
-                connectionStatusLabel.Text = $"Connection Status: {error}";
+                connectionStatusOutputLabel.Text = $"Disconnected - {error}";
         }
 
         // Sets a callback for the tick timer
@@ -71,6 +74,11 @@ namespace OnAirSign
         }
 
         private void label1_Click_2(object sender, EventArgs e)
+        {
+
+        }
+
+        private void playbackStatusLabel_Click(object sender, EventArgs e)
         {
 
         }

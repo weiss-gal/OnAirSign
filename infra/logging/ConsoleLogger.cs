@@ -19,7 +19,7 @@ namespace OnAirSign.infra.logging
         public void Log(LogLevel level, string message)
         {
             if (level >= minLevel)
-                Console.WriteLine($"{level}: {message}");
+                Console.WriteLine($"[{DateTime.Now}] {level}: {message}");
         }
     }
 }

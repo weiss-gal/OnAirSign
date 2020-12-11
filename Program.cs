@@ -51,7 +51,7 @@ namespace OnAirSign
 
         private static void timer()
         {
-            Console.WriteLine("Timer started");
+            Console.WriteLine("Refresh display timer started");
             var onAirStatus = getOnAirStatus();
             refreshDisplay(onAirStatus);
         }

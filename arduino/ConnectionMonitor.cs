@@ -1,11 +1,12 @@
-﻿using System;
+﻿using OnAirSign.infra.logging;
+using System;
 using System.Threading;
 
 namespace OnAirSign.arduino
 {
-    public class ConnectionMonitor
+    public class ConnectionMonitor : IDisposable
     {
-        const int pollIntervalMs = 1000;
+        const int pollIntervalMs = 300;
         const int maxFailures = 3;
         private Timer connectionStatusTimer;
         private bool isConnected = false;
@@ -13,28 +14,34 @@ namespace OnAirSign.arduino
         Action sendHelloCB;
         int connectionFailures = 0;
         bool responseRecevied;
+        int id = new Random().Next(); // For logging
+        ILogger logger;
 
-        public ConnectionMonitor(Action sendHelloCB, Action<bool> updateConnectionStateCB)
+        public ConnectionMonitor(Action sendHelloCB, Action<bool> updateConnectionStateCB, ILogger logger)
         {
             this.sendHelloCB = sendHelloCB;
             this.updateConnectionStateCB = updateConnectionStateCB;
-            connectionStatusTimer = new Timer(connectionTimerCallback, null, 0, pollIntervalMs);
+            this.logger = logger;
+            connectionStatusTimer = new Timer((dummy) => { connectionTimerCallback(id); }, null, 0, pollIntervalMs);
+            logger.Log(LogLevel.Debug, $"Created new Connection monitor with ID: {id}");
+          
         }
 
         private void setConnectionStatus(bool newIsConnected)
         {
             if (this.isConnected != newIsConnected)
             {
-                Console.WriteLine($"Connection status changed to: {newIsConnected}");
+                logger.Log(LogLevel.Info, $"Connection status changed to: {newIsConnected}");
                 this.updateConnectionStateCB(newIsConnected);
             }
 
             this.isConnected = newIsConnected;
         }
 
-        private void connectionTimerCallback(Object dummy)
+        private void connectionTimerCallback(int id)
         {
-            Console.WriteLine($"Connection timer callback: response recieved={responseRecevied}, connection failures={connectionFailures}");
+            var message = $"Connection timer [{id}] callback: response recieved={responseRecevied}, connection failures={connectionFailures}";
+            logger.Log(LogLevel.Debug, message);
             if (responseRecevied)
             {
                 connectionFailures = 0;
@@ -54,15 +61,24 @@ namespace OnAirSign.arduino
             sendHelloCB();
         }
      
-
-        ~ConnectionMonitor()
-        {
-            connectionStatusTimer.Dispose();
-        }
-
         public void ResponseRecived()
         {
             responseRecevied = true;
+        }
+
+        public void Dispose()
+        {
+            logger.Log(LogLevel.Debug, $"Connection timer with id [{id}] disposed");
+            if (connectionStatusTimer != null)
+            {
+                connectionStatusTimer.Dispose();
+                connectionStatusTimer = null;
+            }   
+        }
+
+        ~ConnectionMonitor()
+        {
+            Dispose();
         }
     }
 }

@@ -14,7 +14,17 @@ namespace OnAirSign.detection
         private static bool IsDeviceStreaming(EDataFlow type)
         {
             var enumerator = (IMMDeviceEnumerator)(new MMDeviceEnumerator());
-            var speakers = enumerator.GetDefaultAudioEndpoint(type, ERole.eMultimedia);
+            IMMDevice speakers;
+            try
+            {
+                speakers = enumerator.GetDefaultAudioEndpoint(type, ERole.eMultimedia);
+            }
+            // No default audio device found
+            catch (System.Runtime.InteropServices.COMException)
+            {
+                return false;
+            }
+
             var meter = (IAudioMeterInformation)speakers.Activate(typeof(IAudioMeterInformation).GUID, 0, IntPtr.Zero);
             var value = meter.GetPeakValue();
 
@@ -78,5 +88,4 @@ namespace OnAirSign.detection
             // the rest is not defined/needed
         }
     }
-   
 }

@@ -6,7 +6,7 @@ using System.Threading;
 namespace OnAirSign.arduino
 {
     
-    class SerialMailbox
+    class SerialMailbox : IDisposable
     {
 
         ConcurrentQueue<string> inbox = new ConcurrentQueue<string>();
@@ -55,10 +55,16 @@ namespace OnAirSign.arduino
             thread.Start();
         }
 
-        ~SerialMailbox()
+        // This function is supposed to be Idempotent, so there is no need to distinguish between explicit and implicit calls
+        public void Dispose()
         {
             exit = true;
             thread.Join();
+        }
+
+        ~SerialMailbox()
+        {
+            Dispose();      
         }
 
         public void SendMessage(string msg)
@@ -80,6 +86,6 @@ namespace OnAirSign.arduino
                 return msg;
 
             return null;
-        }
+        }     
     }
 }

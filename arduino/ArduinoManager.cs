@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
+using System.Threading;
 
 namespace OnAirSign.arduino
 {
@@ -22,25 +23,136 @@ namespace OnAirSign.arduino
         public const string OPTION_REASON = "reason";
     }
 
+    enum State
+    {
+        Scanning,
+        Attempting,
+        Connected,
+        Disconnected // Waiting for connection to resume
+    }
+
     public class ArduinoManager
     {
       
         const int DefaultBaudeRate = 115200;
+        int baudRate;
         SerialPort port;
         SerialMailbox mailbox;
         ConnectionMonitor connectionMonitor;
         Action dataReceivedAction;
         ILogger logger;
+        State state;
+        Queue<string> portsToScan = new Queue<string>();
+        Timer stateTimer;
 
-        public ArduinoManager(string portName, ILogger logger, int baudRate = DefaultBaudeRate)
+        public ArduinoManager(ILogger logger, int baudRate = DefaultBaudeRate)
         {
-            port = new SerialPort(portName, baudRate);
+            this.baudRate = baudRate;
             this.logger = logger;
-            port.Open();
+            
             dataReceivedAction = () => dataRecieved();
+        }
+
+        private void CleanupConnection()
+        {
+            port = null;
+            if (mailbox != null)
+            {
+                mailbox.Dispose();
+                mailbox = null;
+            }
+
+            if (connectionMonitor != null)
+            {
+                connectionMonitor.Dispose();
+                connectionMonitor = null;
+            }
+        }
+
+        private bool AttemptConnection(string portName)
+        {
+            CleanupConnection();
+
+            port = new SerialPort(portName, baudRate);
+            try
+            {
+                port.Open();
+            } catch (UnauthorizedAccessException)
+            {
+                logger.Log(LogLevel.Warning, $"Failed to open connection at port {portName}");
+                return false;
+            }
             // Using Invoke() to force handling from main thread
             mailbox = new SerialMailbox(port, () => dataReceivedAction.Invoke());
-            connectionMonitor = new ConnectionMonitor(sendHello, updateConnectionStatus);
+            connectionMonitor = new ConnectionMonitor(sendHello, 
+                (connected) => SetState(connected ? State.Connected : State.Disconnected), 
+                logger);
+            updateConnectionStatus($"Opening port {portName}");
+            return true;
+        }
+
+        private bool GetNewPorts()
+        {
+            logger.Log(LogLevel.Info, "Querying for serial ports");
+            var newPorts = SerialPort.GetPortNames();
+            if (newPorts.Count() == 0)
+            {
+                updateConnectionStatus("No serial ports found");
+                return false;
+            }
+            logger.Log(LogLevel.Debug, $"Got ports: {string.Join(";", newPorts)}");
+
+            portsToScan = new Queue<string>(newPorts);           
+            return true;
+        }
+
+        // This is the internal state machine
+        private void SetState(State state)
+        {
+            logger.Log(LogLevel.Debug, $"Changing state to {state}");
+            const int PortsPollingIntervalMS = 1000; // wait 1 second if no ports were found and try again
+            const int TimeoutForInitialConnectionMS = 1000; // wait 1 second for initial connection attempt
+            const int TimeoutForReconnectionMS = 5000; // wait 5 seconds if disconnected from arduino before restarting scan
+
+            this.state = state;
+
+            switch (state)
+            {
+                case State.Scanning:
+                    if (portsToScan.Count == 0)
+                    {
+                        if (GetNewPorts())
+                            stateTimer = new Timer((dummy) => this.SetState(State.Scanning), null, 0, Timeout.Infinite);
+                        else
+                            stateTimer = new Timer((dummy) => this.SetState(State.Scanning), null, PortsPollingIntervalMS, Timeout.Infinite);
+                        return;
+                    }
+
+                    stateTimer = new Timer((dummy) => this.SetState(State.Attempting), null, 0, Timeout.Infinite);
+                    return;
+                case State.Attempting:
+                    var portName = portsToScan.Dequeue();
+                    logger.Log(LogLevel.Info, $"Attempting connection on port {portName}");
+                    var opened = AttemptConnection(portName);
+                    stateTimer = new Timer((dummy) => this.SetState(State.Scanning), null, opened ? 
+                        TimeoutForInitialConnectionMS : 0, Timeout.Infinite);
+                    return;
+                case State.Connected:
+                    logger.Log(LogLevel.Info, "Connected succesfully to port");
+                    updateConnectionStatus(null);
+                    stateTimer.Dispose();
+                    return;
+                case State.Disconnected:
+                    logger.Log(LogLevel.Info, "Disconnected from port");
+                    updateConnectionStatus("Connection lost");
+                    stateTimer = new Timer((dummy) => this.SetState(State.Scanning), null, TimeoutForReconnectionMS, Timeout.Infinite);
+                    return;
+            }
+        }
+
+        public void AutoConnect()
+        {
+            SetState(State.Scanning);
         }
 
         ~ArduinoManager()
@@ -48,7 +160,7 @@ namespace OnAirSign.arduino
             port.Close();
         }
 
-        private int commandCounter = 0;
+        private int commandCounter = 2000;
         private string getCommandId()
         {
             return $"{TextProtocol.OPTION_CMD_ID}={commandCounter++}";
@@ -59,9 +171,9 @@ namespace OnAirSign.arduino
             mailbox.SendMessage($"{TextProtocol.COMMAND_HELLO} {getCommandId()}");
         }
 
-        private void updateConnectionStatus(bool isConnected)
+        private void updateConnectionStatus(string error)
         {
-            this.ConnectionStatus = isConnected ? "Connected" : "Not connected";
+            ConnectionStatus = error;
         }
 
         private Tuple<string, string>breakOnFirstSpace(string input)
@@ -91,7 +203,7 @@ namespace OnAirSign.arduino
                 if (separatorIndex == -1)
                     return new Tuple<string, string>(option, "");
 
-                return new Tuple<string, string>(option.Substring(0, separatorIndex), option.Substring(separatorIndex));
+                return new Tuple<string, string>(option.Substring(0, separatorIndex), option.Substring(separatorIndex + 1));
             }).ToDictionary(tuple => tuple.Item1, tuple => tuple.Item2);
         }
         
@@ -200,9 +312,15 @@ namespace OnAirSign.arduino
 
         public void SendUpdateDisplayMessage(OnAirStatus status)
         {
+            if (mailbox == null)
+            {
+                logger.Log(LogLevel.Warning, "Attempting to write status failed, no arduino connection");
+                return;
+            }
+
             var newDisplayState = "state=" +
-                (status.IsAudioPlaying ? "1" : "0") +
-                (status.IsAudioCapturing ? "1" : "0") +
+                (status.IsAudioPlaying == true ? "1" : "0") +
+                (status.IsAudioCapturing == true ? "1" : "0") +
                 (status.IsCameraCapturing ? "1" : "0");
 
             mailbox.SendMessage($"{TextProtocol.COMMAND_SET_DISPLAY} {getCommandId()} {newDisplayState}");
