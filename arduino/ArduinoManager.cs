@@ -55,17 +55,23 @@ namespace OnAirSign.arduino
 
         private void CleanupConnection()
         {
-            port = null;
+            
+            if (connectionMonitor != null)
+            {
+                connectionMonitor.Dispose();
+                connectionMonitor = null;
+            }
+
             if (mailbox != null)
             {
                 mailbox.Dispose();
                 mailbox = null;
             }
 
-            if (connectionMonitor != null)
+            if (port != null)
             {
-                connectionMonitor.Dispose();
-                connectionMonitor = null;
+                port.Close();
+                port = null;
             }
         }
 
@@ -77,11 +83,17 @@ namespace OnAirSign.arduino
             try
             {
                 port.Open();
-            } catch (UnauthorizedAccessException)
+            }  catch (Exception ex)
             {
-                logger.Log(LogLevel.Warning, $"Failed to open connection at port {portName}");
-                return false;
+                if (ex is UnauthorizedAccessException || ex is System.IO.IOException)
+                {
+                    logger.Log(LogLevel.Warning, $"Failed to open connection at port {portName}");
+                    return false;
+                }
+
+                throw;
             }
+
             // Using Invoke() to force handling from main thread
             mailbox = new SerialMailbox(port, () => dataReceivedAction.Invoke());
             connectionMonitor = new ConnectionMonitor(sendHello, 
