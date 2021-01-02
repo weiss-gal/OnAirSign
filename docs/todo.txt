@@ -1,9 +1,7 @@
 TODO:
 
 P0
-- fix UI
 
 P1
 - support video capture detection
-- support any (not just default) audio devices, including support for no default device
 - switch to threads.timer
