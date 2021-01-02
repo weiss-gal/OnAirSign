@@ -29,7 +29,7 @@ namespace OnAirSign
         public void UpdateOnAirStatus(OnAirStatus status)
         {
             onAirStatus = status;
-            playbackStatusOutputLabel.Text = status.IsAudioCapturing ? "Streaming" : "Idle";
+            playbackStatusOutputLabel.Text = status.IsAudioPlaying ? "Streaming" : "Idle";
             microphoneStatusOutputLabel.Text = status.IsAudioCapturing ? "Streaming" : "Idle";
         }
 
