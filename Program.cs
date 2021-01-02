@@ -4,17 +4,10 @@ using OnAirSign.display;
 using OnAirSign.infra.logging;
 using OnAirSign.state;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Timers;
 using System.Windows.Forms;
 
 namespace OnAirSign
 {
-  
-
-
     static class Program
     {
         static OnAirForm form;
@@ -36,8 +29,6 @@ namespace OnAirSign
             var logger = new ConsoleLogger(LogLevel.Debug);
             display = new LedDisplay(logger);
             Application.Run(form);
-          
-
         }
 
         private static OnAirStatus GetOnAirStatus()
@@ -57,7 +48,6 @@ namespace OnAirSign
 
         private static void Timer()
         {
-            Console.WriteLine("Refresh display timer started");
             var onAirStatus = GetOnAirStatus();
             RefreshDisplay(onAirStatus);
         }
