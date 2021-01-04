@@ -1,7 +1,11 @@
 TODO:
 
 P0
+- bug: program exists when the device is disconnected
+- disconnected indication on display
 
 P1
+- improve discovery times
+- add "about" with links to project
 - support video capture detection
 - switch to threads.timer

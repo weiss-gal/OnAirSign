@@ -35,8 +35,8 @@ namespace OnAirSign.arduino
 
         private SerialPort initSerialPort(SerialPort serialPort)
         {
-            serialPort.ReadTimeout = 2000;
-            serialPort.WriteTimeout = 500;
+            serialPort.ReadTimeout = 200;
+            serialPort.WriteTimeout = 200;
             serialPort.DataBits = 8;
             serialPort.Parity = Parity.None;
             serialPort.StopBits = StopBits.One;
