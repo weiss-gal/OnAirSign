@@ -40,7 +40,7 @@ namespace OnAirSign.arduino
         SerialMailbox mailbox;
         ConnectionMonitor connectionMonitor;
         Action dataReceivedAction;
-        ILogger logger;
+        ILogger _logger;
         State state;
         Queue<string> portsToScan = new Queue<string>();
         Timer stateTimer;
@@ -48,7 +48,7 @@ namespace OnAirSign.arduino
         public ArduinoManager(ILogger logger, int baudRate = DefaultBaudeRate)
         {
             this.baudRate = baudRate;
-            this.logger = logger;
+            this._logger = logger;
             
             dataReceivedAction = () => dataRecieved();
         }
@@ -87,7 +87,7 @@ namespace OnAirSign.arduino
             {
                 if (ex is UnauthorizedAccessException || ex is System.IO.IOException)
                 {
-                    logger.Log(LogLevel.Warning, $"Failed to open connection at port {portName}");
+                    _logger.Log(LogLevel.Warning, $"Failed to open connection at port {portName}");
                     return false;
                 }
 
@@ -95,24 +95,24 @@ namespace OnAirSign.arduino
             }
 
             // Using Invoke() to force handling from main thread
-            mailbox = new SerialMailbox(port, () => dataReceivedAction.Invoke());
+            mailbox = new SerialMailbox(port, () => dataReceivedAction.Invoke(), _logger);
             connectionMonitor = new ConnectionMonitor(sendHello, 
                 (connected) => SetState(connected ? State.Connected : State.Disconnected), 
-                logger);
+                _logger);
             updateConnectionStatus($"Opening port {portName}");
             return true;
         }
 
         private bool GetNewPorts()
         {
-            logger.Log(LogLevel.Info, "Querying for serial ports");
+            _logger.Log(LogLevel.Info, "Querying for serial ports");
             var newPorts = SerialPort.GetPortNames();
             if (newPorts.Count() == 0)
             {
                 updateConnectionStatus("No serial ports found");
                 return false;
             }
-            logger.Log(LogLevel.Debug, $"Got ports: {string.Join(";", newPorts)}");
+            _logger.Log(LogLevel.Debug, $"Got ports: {string.Join(";", newPorts)}");
 
             portsToScan = new Queue<string>(newPorts);           
             return true;
@@ -121,7 +121,7 @@ namespace OnAirSign.arduino
         // This is the internal state machine
         private void SetState(State state)
         {
-            logger.Log(LogLevel.Debug, $"Changing state to {state}");
+            _logger.Log(LogLevel.Debug, $"Changing state to {state}");
             const int PortsPollingIntervalMS = 1000; // wait 1 second if no ports were found and try again
             const int TimeoutForInitialConnectionMS = 1000; // wait 1 second for initial connection attempt
             const int TimeoutForReconnectionMS = 5000; // wait 5 seconds if disconnected from arduino before restarting scan
@@ -144,18 +144,18 @@ namespace OnAirSign.arduino
                     return;
                 case State.Attempting:
                     var portName = portsToScan.Dequeue();
-                    logger.Log(LogLevel.Info, $"Attempting connection on port {portName}");
+                    _logger.Log(LogLevel.Info, $"Attempting connection on port {portName}");
                     var opened = AttemptConnection(portName);
                     stateTimer = new Timer((dummy) => this.SetState(State.Scanning), null, opened ? 
                         TimeoutForInitialConnectionMS : 0, Timeout.Infinite);
                     return;
                 case State.Connected:
-                    logger.Log(LogLevel.Info, "Connected succesfully to port");
+                    _logger.Log(LogLevel.Info, "Connected succesfully to port");
                     updateConnectionStatus(null);
                     stateTimer.Dispose();
                     return;
                 case State.Disconnected:
-                    logger.Log(LogLevel.Info, "Disconnected from port");
+                    _logger.Log(LogLevel.Info, "Disconnected from port");
                     updateConnectionStatus("Connection lost");
                     stateTimer = new Timer((dummy) => this.SetState(State.Scanning), null, TimeoutForReconnectionMS, Timeout.Infinite);
                     return;
@@ -232,7 +232,7 @@ namespace OnAirSign.arduino
 
             if (!options.ContainsKey(TextProtocol.OPTION_STATUS))
             {
-                logger.Log(LogLevel.Warning, 
+                _logger.Log(LogLevel.Warning, 
                     $"Got Invalid response for {TextProtocol.COMMAND_SET_DISPLAY} command, missing '{TextProtocol.OPTION_STATUS}' option");
                 return;
             }
@@ -242,7 +242,7 @@ namespace OnAirSign.arduino
                 var errorReason = options.ContainsKey(TextProtocol.OPTION_REASON) ? $"Error reason ='{options[TextProtocol.OPTION_REASON]}'" :
                     $"No Error reason";
 
-                logger.Log(LogLevel.Warning, $"Failed to set display status. {errorReason}");
+                _logger.Log(LogLevel.Warning, $"Failed to set display status. {errorReason}");
                 return;
             }
 
@@ -280,17 +280,17 @@ namespace OnAirSign.arduino
             LogLevel level;
             if (!logLevelMap.TryGetValue(msgTuple.Item1, out level))
             {
-                logger.Log(LogLevel.Warning, $"Got log message with unknown level '{level}'");
+                _logger.Log(LogLevel.Warning, $"Got log message with unknown level '{level}'");
                 return;
             }
 
             if (String.IsNullOrEmpty(msgTuple.Item2))
             {
-                logger.Log(LogLevel.Warning, $"Got log message with empty content");
+                _logger.Log(LogLevel.Warning, $"Got log message with empty content");
                 return;
             }
 
-            logger.Log(level, $"Arduino: {msgTuple.Item2}");
+            _logger.Log(level, $"Arduino: {msgTuple.Item2}");
         }
 
         private void handleMessage(string msg)
@@ -326,7 +326,7 @@ namespace OnAirSign.arduino
         {
             if (mailbox == null)
             {
-                logger.Log(LogLevel.Warning, "Attempting to write status failed, no arduino connection");
+                _logger.Log(LogLevel.Warning, "Attempting to write status failed, no arduino connection");
                 return;
             }
 
