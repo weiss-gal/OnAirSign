@@ -1,10 +1,11 @@
 TODO:
 
 P0
-- bug: program exists when the device is disconnected
+- close program when closing window
 - disconnected indication on display
 
 P1
+- display connected port
 - improve discovery times
 - add "about" with links to project
 - support video capture detection
