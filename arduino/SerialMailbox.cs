@@ -2,19 +2,21 @@
 using System.IO.Ports;
 using System.Collections.Concurrent;
 using System.Threading;
+using OnAirSign.infra.logging;
 
 namespace OnAirSign.arduino
 {
     
     class SerialMailbox : IDisposable
     {
+        const int RecoveryFromReadFailureMS = 1000;
 
         ConcurrentQueue<string> inbox = new ConcurrentQueue<string>();
-        //ConcurrentQueue<string> outbox;
         SerialPort _serialPort;
         Thread thread;
         bool exit = false;
         Action dataReceivedCB;
+        private readonly ILogger _logger;
 
         private void readThread()
         {
@@ -27,16 +29,20 @@ namespace OnAirSign.arduino
                     Console.WriteLine($"reading line from serial port: '{line}'");
                     inbox.Enqueue(line);
                     dataReceivedCB();
-                } catch (System.TimeoutException) {
-                    Console.WriteLine($"reading exception");
+                } catch (System.TimeoutException _)
+                { 
+                } catch (Exception e)
+                {
+                    _logger.Log(LogLevel.Warning, $"Reading failed with '{e.GetType()}'. waiting for {RecoveryFromReadFailureMS} ms. Exception: {e}");
+                    Thread.Sleep(RecoveryFromReadFailureMS);
                 }
             }
         }
 
         private SerialPort initSerialPort(SerialPort serialPort)
         {
-            serialPort.ReadTimeout = 2000;
-            serialPort.WriteTimeout = 500;
+            serialPort.ReadTimeout = 1000;
+            serialPort.WriteTimeout = 200;
             serialPort.DataBits = 8;
             serialPort.Parity = Parity.None;
             serialPort.StopBits = StopBits.One;
@@ -46,10 +52,11 @@ namespace OnAirSign.arduino
             return serialPort;
         }
 
-        public SerialMailbox(SerialPort serialPort, Action dataReceivedCB)
+        public SerialMailbox(SerialPort serialPort, Action dataReceivedCB, ILogger logger)
         {
             _serialPort = initSerialPort(serialPort);
             this.dataReceivedCB = dataReceivedCB;
+            _logger = logger;
             
             thread = new Thread(new ThreadStart(readThread));
             thread.Start();
