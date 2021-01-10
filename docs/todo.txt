@@ -1,7 +1,8 @@
 TODO:
 
 P0
-- fix UI
+- add connectivity indiation to display 
+- bug when no device connected
 
 P1
 - support video capture detection
