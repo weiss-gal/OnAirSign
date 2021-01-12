@@ -124,7 +124,7 @@ namespace OnAirSign.arduino
             _logger.Log(LogLevel.Debug, $"Changing state to {state}");
             const int PortsPollingIntervalMS = 1000; // wait 1 second if no ports were found and try again
             const int TimeoutForInitialConnectionMS = 1000; // wait 1 second for initial connection attempt
-            const int TimeoutForReconnectionMS = 5000; // wait 5 seconds if disconnected from arduino before restarting scan
+            const int TimeoutForReconnectionMS = 2000; // wait 2 seconds if disconnected from arduino before restarting scan
 
             this.state = state;
 

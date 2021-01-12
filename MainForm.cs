@@ -1,13 +1,5 @@
-﻿using OnAirSign.detection;
-using OnAirSign.state;
+﻿using OnAirSign.state;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OnAirSign
@@ -29,7 +21,7 @@ namespace OnAirSign
         public void UpdateOnAirStatus(OnAirStatus status)
         {
             onAirStatus = status;
-            playbackStatusOutputLabel.Text = status.IsAudioCapturing ? "Streaming" : "Idle";
+            playbackStatusOutputLabel.Text = status.IsAudioPlaying ? "Streaming" : "Idle";
             microphoneStatusOutputLabel.Text = status.IsAudioCapturing ? "Streaming" : "Idle";
         }
 

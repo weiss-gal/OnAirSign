@@ -5,7 +5,9 @@ P0
 - bug when no device connected
 
 P1
+- display connected port
+- improve discovery times
+- add "about" with links to project
 - support video capture detection
 - support any (not just default) audio devices, including support for no default device
-- switch to threads.timer
-- move indication to tray
+- move indication to traymer
