@@ -1,23 +1,19 @@
-﻿using OnAirSign.detection;
+﻿using NAudio.CoreAudioApi;
+using OnAirSign.detection;
 using OnAirSign.display;
 using OnAirSign.infra.logging;
 using OnAirSign.state;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Timers;
 using System.Windows.Forms;
 
 namespace OnAirSign
 {
-  
-
-
     static class Program
     {
         static OnAirForm form;
         static LedDisplay display;
+        static AudioStatusDetector audioPlayingDetector;
+        static AudioStatusDetector audioCapturingDetector;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -26,20 +22,21 @@ namespace OnAirSign
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            audioPlayingDetector = new AudioStatusDetector(DataFlow.Render);
+            audioCapturingDetector = new AudioStatusDetector(DataFlow.Capture);
             form = new OnAirForm();
-            form.OnTick(timer);
+            form.OnTick(Timer);
             var logger = new ConsoleLogger(LogLevel.Debug);
             display = new LedDisplay(logger);
             Application.Run(form);
-            
         }
 
-        private static OnAirStatus getOnAirStatus()
+        private static OnAirStatus GetOnAirStatus()
         {
-            return new OnAirStatus(AudioStatusDetection.IsAudioPlaying(), AudioStatusDetection.IsAudioCapturing(), false);
+            return new OnAirStatus(audioPlayingDetector.IsDeviceStreaming, audioCapturingDetector.IsDeviceStreaming, false);
         }
 
-        private static void refreshDisplay(OnAirStatus onAirStatus)
+        private static void RefreshDisplay(OnAirStatus onAirStatus)
         {
             form.UpdateOnAirStatus(onAirStatus);
             var displayUpdateResult = display.UpdateDisplay(onAirStatus);
@@ -49,11 +46,10 @@ namespace OnAirSign
             form.UpdateCommunicationStatusError(errorMessage);
         }
 
-        private static void timer()
+        private static void Timer()
         {
-            Console.WriteLine("Refresh display timer started");
-            var onAirStatus = getOnAirStatus();
-            refreshDisplay(onAirStatus);
+            var onAirStatus = GetOnAirStatus();
+            RefreshDisplay(onAirStatus);
         }
     }
 }
