@@ -2,7 +2,6 @@ TODO:
 
 P0
 - add connectivity indiation to display 
-- bug when no device connected
 
 P1
 - display connected port

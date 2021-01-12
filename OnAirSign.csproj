@@ -98,10 +98,10 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="docs\" />
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="docs\arduino_api.txt" />
+    <None Include="docs\todo.txt" />
     <Content Include="favicon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,6 +1,5 @@
 ﻿using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
-using System.Collections.Generic;
 
 namespace OnAirSign.detection
 {
@@ -8,7 +7,8 @@ namespace OnAirSign.detection
     public class AudioStatusDetector : IAudioChangeListener
     {
         private readonly DataFlow _type;
-        private MMDeviceCollection _collection; 
+        private MMDeviceCollection _collection;
+        private bool _collectionShouldChange = true;
         private readonly MMDeviceEnumerator _enumerator;
         private readonly NotificationClient _notificationClient;
 
@@ -17,7 +17,6 @@ namespace OnAirSign.detection
             
             _type = type;
             _enumerator = new MMDeviceEnumerator();
-            _collection = _enumerator.EnumerateAudioEndPoints(type, DeviceState.Active);
             _notificationClient = new NotificationClient(this);
             _enumerator.RegisterEndpointNotificationCallback(_notificationClient);
 
@@ -32,6 +31,13 @@ namespace OnAirSign.detection
         {
             get
             {
+                // COM is not working very well with threads, so we defer the refresh to happen here
+                // can't get more lazy than that
+                if (_collectionShouldChange)
+                {
+                    _collection = _enumerator.EnumerateAudioEndPoints(_type, DeviceState.Active);
+                    _collectionShouldChange = false;
+                }
 
                 foreach (var device in _collection)
                 {
@@ -57,7 +63,7 @@ namespace OnAirSign.detection
         public void OnAudioChange()
         {
             // No reason to be to subtle here, we just get a new enumarator
-            _collection = _enumerator.EnumerateAudioEndPoints(_type, DeviceState.Active);
+            _collectionShouldChange = true;
         }
 
         class NotificationClient : IMMNotificationClient
