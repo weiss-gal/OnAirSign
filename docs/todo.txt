@@ -1,12 +1,14 @@
 TODO:
 
 P0
-- close program when closing window
-- disconnected indication on display
+- add connectivity indiation to display 
+- bug when no device connected
 
 P1
 - display connected port
 - improve discovery times
 - add "about" with links to project
 - support video capture detection
+- support any (not just default) audio devices, including support for no default device
 - switch to threads.timer
+
