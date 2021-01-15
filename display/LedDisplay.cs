@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace OnAirSign.display
 {
-    public class LedDisplay
+    public class LedDisplay : IDisposable
     {
         ArduinoManager arduino;
         ILogger logger;
@@ -31,6 +31,11 @@ namespace OnAirSign.display
         public string GetConnectionStatus()
         {
             return arduino.ConnectionStatus;
+        }
+
+        public void Dispose()
+        {
+            arduino.Dispose();
         }
     }
 }

@@ -31,7 +31,7 @@ namespace OnAirSign.arduino
         Disconnected // Waiting for connection to resume
     }
 
-    public class ArduinoManager
+    public class ArduinoManager : IDisposable
     {
       
         const int DefaultBaudeRate = 115200;
@@ -41,7 +41,6 @@ namespace OnAirSign.arduino
         ConnectionMonitor connectionMonitor;
         Action dataReceivedAction;
         ILogger _logger;
-        State state;
         Queue<string> portsToScan = new Queue<string>();
         Timer stateTimer;
 
@@ -126,8 +125,6 @@ namespace OnAirSign.arduino
             const int TimeoutForInitialConnectionMS = 1000; // wait 1 second for initial connection attempt
             const int TimeoutForReconnectionMS = 2000; // wait 2 seconds if disconnected from arduino before restarting scan
 
-            this.state = state;
-
             switch (state)
             {
                 case State.Scanning:
@@ -167,9 +164,14 @@ namespace OnAirSign.arduino
             SetState(State.Scanning);
         }
 
+        public void Dispose()
+        {
+            CleanupConnection();
+        }
+
         ~ArduinoManager()
         {
-            port.Close();
+            Dispose();
         }
 
         private int commandCounter = 2000;

@@ -26,9 +26,15 @@ namespace OnAirSign
             audioCapturingDetector = new AudioStatusDetector(DataFlow.Capture);
             form = new OnAirForm();
             form.OnTick(Timer);
+            form.OnClose(Close);
             var logger = new ConsoleLogger(LogLevel.Debug);
             display = new LedDisplay(logger);
             Application.Run(form);
+        }
+
+        private static void Close()
+        {
+            display.Dispose();
         }
 
         private static OnAirStatus GetOnAirStatus()

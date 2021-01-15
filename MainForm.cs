@@ -8,8 +8,9 @@ namespace OnAirSign
     public partial class OnAirForm : Form
     {
         int counter = 0;
-        Callback onTickCB = null;
-        OnAirStatus onAirStatus; 
+        Callback _onTickCB = null;
+        OnAirStatus onAirStatus;
+        private Callback _onCloseCB;
 
         public OnAirForm()
         {
@@ -37,7 +38,12 @@ namespace OnAirSign
         // Sets a callback for the tick timer
         public void OnTick(Callback cb)
         {
-            onTickCB = cb;
+            _onTickCB = cb;
+        }
+
+        public void OnClose(Callback cb)
+        {
+            _onCloseCB = cb;
         }
         
         private void label1_Click(object sender, EventArgs e)
@@ -57,7 +63,7 @@ namespace OnAirSign
             //captureStatusLabel.Text = $"Capture Status: {captureStatus}";
 
             //Do whatever we were asked
-            onTickCB();
+            _onTickCB();
         }
 
         private void label1_Click_1(object sender, EventArgs e)
@@ -73,6 +79,12 @@ namespace OnAirSign
         private void playbackStatusLabel_Click(object sender, EventArgs e)
         {
 
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            _onCloseCB();
+            base.OnFormClosing(e);
         }
     }
 }
