@@ -1,12 +1,15 @@
 TODO:
 
-P0
+P0 - MVP
 - add connectivity indiation to display 
 
-P1
-- display connected port
-- improve discovery times
+P1 - Mandatory Productization
 - add "about" with links to project
+- public binary 
+- fix icons 
+
+P2 - experience
+- display connected port (add hover insight to application UI)
+- improve discovery times
 - support video capture detection
-- support any (not just default) audio devices, including support for no default device
-- move indication to traymer
+
