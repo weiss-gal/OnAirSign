@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OnAirForm));
             this.playbackStatusLabel = new System.Windows.Forms.Label();
             this.captureTimer = new System.Windows.Forms.Timer(this.components);
             this.microphoneStatusLabel = new System.Windows.Forms.Label();
@@ -110,6 +111,7 @@
             this.Controls.Add(this.connectionStatusLabel);
             this.Controls.Add(this.microphoneStatusLabel);
             this.Controls.Add(this.playbackStatusLabel);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "OnAirForm";
             this.Text = "On Air Sign Controller";
             this.ResumeLayout(false);
