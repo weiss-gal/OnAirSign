@@ -1,10 +1,31 @@
 # OnAirSign
 "On-Air" led sign - controller application
 
-update [30-Jan-2021]: Finally - the beta version is completed and ready for everyone to use.
 
-The target is to create an arduino based "on air" sign, connected to a PC via USB cable, 
-the sign is using an 8x32 led matrix to present the status of your speakers and microphone (camera will be added at some point), letting peoeple around you know when you should not be interrupted. 
+
+**update [30-Jan-2021]: Finally - the beta version is completed and ready for everyone to use.**
+
+Working from home is not simple, we all have distractions and interruptions. 
+But from now on, you can at least make sure everybody knows that you are in a call and should not be interrupted. 
+
+## How can you do it ? 
+
+Using a few affordable components you can now build your own "On-Air" sign, which monitors your computer audio devices 
+The sign is a 8x32 dot matrix which tells everyone around if you are currently listening to something, someone is listening to you, or both.
+
+## What do I need to start ? 
+Not much, some basic electricity and computer programming skill level is required, as you need to load the software and connect some wires yourself. 
+You also need to buy the components to set it up. 
+
+### System requirements
+* Any computer running windows 10 
+
+
+## What's up next
+I have many ideas in mind, and you are welcome to bring your own, here are a few of mine:
+* Adding support for camera status (very usefull if you happen to work from your bedroom)
+* Bluetooth connectivity - so you can put the sign away from your computer 
+
 
 if you have questions or anything to contribute, contact me: weiss_gal at yahoo.com
 
