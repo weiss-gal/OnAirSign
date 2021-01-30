@@ -1,9 +1,9 @@
 TODO:
 
-P0 - MVP
-- add connectivity indiation to display 
+P0 - MVP - DONE !!!
 
 P1 - Mandatory Productization
+- reduce memory by switching to program strings
 - add "about" with links to project
 - public binary 
 - fix icons 
