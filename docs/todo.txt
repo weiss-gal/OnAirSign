@@ -10,6 +10,8 @@ P1 - Mandatory Productization
 
 P2 - experience
 - display connected port (add hover insight to application UI)
-- improve discovery times
+-  improve discovery times
 - support video capture detection
+- loading arduino firmware from host
+- add "manual" mode with user crafted message
 
