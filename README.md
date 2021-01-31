@@ -10,7 +10,7 @@ But from now on, you can at least make sure everybody knows that you are in a ca
 
 ## How can you do it ? 
 
-Using a few affordable components you can now build your own "On-Air" sign, which monitors your computer audio devices 
+Using a few affordable components you can now build your own "On-Air" sign, which monitors your computer audio devices. 
 The sign is a 8x32 dot matrix which tells everyone around if you are currently listening to something, someone is listening to you, or both.
 
 Here is a picture of the prototype, don't worry - your one is going to be much nicer
@@ -21,9 +21,8 @@ Here is a picture of the prototype, don't worry - your one is going to be much n
 Not much, some basic electricity and computer programming skill level is required, as you need to load the software and connect some wires yourself. 
 You also need to buy the components to set it up. 
 
-### System requirements
-* Any computer running windows 10 
-
+## Where do I start ? 
+I'm just working on a wiki page: [Setting up On Air Sign - the complete guide](https://github.com/weiss-gal/OnAirSign/wiki/Setting-up-On-Air-Sign---the-complete-guide)
 
 ## What's up next
 I have many ideas in mind, and you are welcome to bring your own, here are a few of mine:
