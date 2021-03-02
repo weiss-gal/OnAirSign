@@ -1,10 +1,6 @@
 # OnAirSign
 "On-Air" led sign - controller application
 
-
-
-**update [30-Jan-2021]: Finally - the beta version is completed and ready for everyone to use.**
-
 Working from home is not simple, we all have distractions and interruptions. 
 But from now on, you can at least make sure everybody knows that you are in a call and should not be interrupted. 
 
