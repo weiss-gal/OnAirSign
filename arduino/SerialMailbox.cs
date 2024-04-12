@@ -27,7 +27,7 @@ namespace OnAirSign.arduino
                     var line = _serialPort.ReadLine();
                     inbox.Enqueue(line);
                     dataReceivedCB();
-                } catch (System.TimeoutException _)
+                } catch (System.TimeoutException)
                 { 
                 } catch (Exception e)
                 {
